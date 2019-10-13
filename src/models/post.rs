@@ -2,7 +2,7 @@ use crate::schema::posts;
 use chrono::{Local, NaiveDateTime};
 use serde::{Deserialize, Serialize};
 
-#[derive(Queryable, Serialize, Debug)]
+#[derive(Queryable, Serialize, Deserialize, Debug, AsChangeset)]
 pub struct Post {
     pub id: i32,
     pub body: Option<String>,

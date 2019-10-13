@@ -72,3 +72,20 @@ pub fn delete(post_target: web::Json<DeletePost>) -> impl Responder {
 
     respond_with_json(deleted_post)
 }
+
+#[put("/update")]
+pub fn update(post_json: String) -> impl Responder {
+    use crate::schema::posts;
+
+    let conn = establish_connection();
+
+    let new_post: Post = serde_json::from_str(&post_json).unwrap();
+
+    let updated_post: Post = diesel::update(posts::table)
+        .set(&new_post)
+        .filter(posts::id.eq(new_post.id))
+        .get_result(&conn)
+        .expect("Error updating post");
+    
+    respond_with_json(updated_post)
+}
