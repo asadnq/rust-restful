@@ -30,6 +30,11 @@ impl NewPost {
     }
 }
 
+#[derive(Deserialize)]
+pub struct DeletePost {
+    pub id: i32,
+}
+
 /*id SERIAL PRIMARY KEY,
    body VARCHAR,
    user_id INT,

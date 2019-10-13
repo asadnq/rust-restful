@@ -7,7 +7,7 @@ use serde_json;
 
 use crate::diesel::prelude::*;
 use crate::establish_connection;
-use crate::models::post::{NewPost, Post};
+use crate::models::post::{DeletePost, NewPost, Post};
 
 pub fn respond_with_json<T: Serialize>(body: T) -> impl Responder {
     let response = serde_json::to_string(&body).unwrap();
@@ -22,12 +22,7 @@ pub fn get_all() -> impl Responder {
     use crate::schema::posts::dsl;
     let conn = establish_connection();
 
-    let posts = dsl::posts
-        .limit(5)
-        .load::<Post>(&conn)
-        .expect("Error loading posts");
-    // let mut result = ListOfPost::new();
-    println!("posts: {:?}", posts);
+    let posts = dsl::posts.load::<Post>(&conn).expect("Error loading posts");
 
     respond_with_json(posts)
 }
@@ -63,4 +58,17 @@ pub fn add(post: String) -> impl Responder {
         .expect("Error when creating post");
 
     respond_with_json(new_post)
+}
+
+#[delete("/delete")]
+pub fn delete(post_target: web::Json<DeletePost>) -> impl Responder {
+    use crate::schema::posts::dsl::*;
+
+    let conn = establish_connection();
+
+    let deleted_post: Post = diesel::delete(posts.filter(id.eq(post_target.id)))
+        .get_result(&conn)
+        .expect("Error deleting post");
+
+    respond_with_json(deleted_post)
 }

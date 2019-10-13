@@ -9,6 +9,7 @@ fn init_server() {
             .service(posts::get_all)
             .service(posts::find)
             .service(posts::add)
+            .service(posts::delete)
         )
     })
     .bind("127.0.0.1:8088")
