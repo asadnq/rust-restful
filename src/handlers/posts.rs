@@ -22,7 +22,7 @@ pub fn get_all() -> impl Responder {
     use crate::schema::posts::dsl;
     let conn = establish_connection();
 
-    let posts = dsl::posts.load::<Post>(&conn).expect("Error loading posts");
+    let posts = dsl::posts.order_by(dsl::id.asc()).load::<Post>(&conn).expect("Error loading posts");
 
     respond_with_json(posts)
 }
