@@ -2,12 +2,12 @@ use actix_web::{delete, get, post, put};
 #[allow(unused_imports)]
 use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder};
 
-use serde_json;
 use serde::Serialize;
+use serde_json;
 
 use crate::diesel::prelude::*;
 use crate::establish_connection;
-use crate::models::post::Post;
+use crate::models::post::{NewPost, Post};
 
 pub fn respond_with_json<T: Serialize>(body: T) -> impl Responder {
     let response = serde_json::to_string(&body).unwrap();
@@ -39,9 +39,28 @@ pub fn find(path: web::Path<(i32,)>) -> impl Responder {
 
     let post = posts
         .filter(id.eq(path.0))
-        .limit(1)
         .first::<Post>(&conn)
         .expect("Error loading post");
 
     respond_with_json(post)
+}
+
+#[post("/add")]
+pub fn add(post: String) -> impl Responder {
+    use crate::schema::posts;
+
+    let conn = establish_connection();
+
+    let mut payload: NewPost = serde_json::from_str(&post).unwrap();
+
+    if payload.created_at == None {
+        payload = payload.with_time();
+    }
+
+    let new_post: Post = diesel::insert_into(posts::table)
+        .values(&payload)
+        .get_result(&conn)
+        .expect("Error when creating post");
+
+    respond_with_json(new_post)
 }
